@@ -1,0 +1,15 @@
+{
+  "name": "Mom's Daily Digest",
+  "short_name": "Mom's Digest",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9f5f0",
+  "theme_color": "#c17050",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
