@@ -148,7 +148,7 @@ function Header() {
 
   return (
     <header className="header">
-      <h1>Mom's Daily Digest</h1>
+      <h1>Patsy's Daily Digest</h1>
       <p className="date">{today}</p>
     </header>
   )
@@ -261,7 +261,7 @@ export default function App() {
         )}
       </main>
       <footer className="footer">
-        Made with love for Mom
+        Made with love for Patsy
       </footer>
     </div>
   )
