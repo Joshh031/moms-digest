@@ -1,21 +1,57 @@
 import { useState, useEffect, useCallback } from 'react'
 
 const FEEDS = [
-  { name: 'Headlines', url: 'https://feeds.npr.org/1001/rss.xml', emoji: '\u{1F4F0}' },
-  { name: 'World', url: 'https://feeds.bbci.co.uk/news/rss.xml', emoji: '\u{1F30D}' },
-  { name: 'Health', url: 'https://feeds.npr.org/1128/rss.xml', emoji: '\u{1F49A}' },
-  { name: 'Cooking', url: 'https://smittenkitchen.com/feed/', emoji: '\u{1F373}' },
-  { name: 'Good News', url: 'https://www.goodnewsnetwork.org/feed/', emoji: '\u{2600}\u{FE0F}' },
+  {
+    name: 'Geopolitics',
+    emoji: '\u{1F30D}',
+    feeds: [
+      'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
+      'https://feeds.npr.org/1004/rss.xml',
+      'http://rss.cnn.com/rss/cnn_world.rss',
+    ],
+  },
+  {
+    name: 'Politics',
+    emoji: '\u{1F3DB}\u{FE0F}',
+    feeds: [
+      'https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml',
+      'https://feeds.npr.org/1014/rss.xml',
+      'http://rss.cnn.com/rss/cnn_allpolitics.rss',
+      'https://feeds.washingtonpost.com/rss/politics',
+    ],
+  },
+  {
+    name: 'Long Island',
+    emoji: '\u{1F5FD}',
+    feeds: [
+      'https://news.google.com/rss/search?q=%22Long+Island%22+when:3d&hl=en-US&gl=US&ceid=US:en',
+      'https://www.newsday.com/arcio/rss/',
+    ],
+  },
+  {
+    name: 'AL & MS',
+    emoji: '\u{1F3E1}',
+    feeds: [
+      'https://mississippitoday.org/feed/',
+      'https://www.al.com/arc/outboundfeeds/rss/?outputType=xml',
+      'https://news.google.com/rss/search?q=Alabama+OR+Mississippi+news+when:3d&hl=en-US&gl=US&ceid=US:en',
+    ],
+  },
+  {
+    name: 'Real Estate',
+    emoji: '\u{1F3E0}',
+    feeds: [
+      'https://rss.nytimes.com/services/xml/rss/nyt/RealEstate.xml',
+      'https://www.housingwire.com/feed/',
+    ],
+  },
 ]
-
-const PROXY = import.meta.env.DEV
-  ? 'https://api.allorigins.win/raw?url='
-  : '/api/rss?url='
 
 function timeAgo(dateStr) {
   if (!dateStr) return ''
   const now = new Date()
   const then = new Date(dateStr)
+  if (isNaN(then)) return ''
   const mins = Math.floor((now - then) / 60000)
   if (mins < 1) return 'just now'
   if (mins < 60) return `${mins}m ago`
@@ -31,6 +67,24 @@ function stripHtml(html) {
   const tmp = document.createElement('div')
   tmp.innerHTML = html
   return tmp.textContent || ''
+}
+
+function extractSource(link) {
+  try {
+    const host = new URL(link).hostname.replace('www.', '')
+    if (host.includes('nytimes')) return 'NYT'
+    if (host.includes('npr')) return 'NPR'
+    if (host.includes('cnn')) return 'CNN'
+    if (host.includes('washingtonpost')) return 'WaPo'
+    if (host.includes('newsday')) return 'Newsday'
+    if (host.includes('mississippitoday')) return 'MS Today'
+    if (host.includes('al.com')) return 'AL.com'
+    if (host.includes('housingwire')) return 'HousingWire'
+    if (host.includes('espn')) return 'ESPN'
+    return host.split('.')[0]
+  } catch {
+    return ''
+  }
 }
 
 function extractImage(item) {
@@ -83,6 +137,7 @@ function parseRSS(xml) {
     ).slice(0, 200),
     pubDate: item.querySelector('pubDate')?.textContent || '',
     image: extractImage(item),
+    source: extractSource(item.querySelector('link')?.textContent || ''),
   }))
 }
 
@@ -117,9 +172,10 @@ function FeedCard({ article }) {
         {article.description && (
           <p className="card-desc">{article.description}</p>
         )}
-        {article.pubDate && (
-          <span className="card-time">{timeAgo(article.pubDate)}</span>
-        )}
+        <div className="card-meta">
+          {article.source && <span className="card-source">{article.source}</span>}
+          {article.pubDate && <span className="card-time">{timeAgo(article.pubDate)}</span>}
+        </div>
       </div>
     </a>
   )
@@ -135,13 +191,30 @@ export default function App() {
     setLoading(true)
     setError(null)
     try {
-      const feedUrl = FEEDS[idx].url
-      const res = await fetch(`${PROXY}${encodeURIComponent(feedUrl)}`)
-      if (!res.ok) throw new Error('Feed unavailable')
-      const xml = await res.text()
-      const parsed = parseRSS(xml)
-      if (parsed.length === 0) throw new Error('No articles found')
-      setArticles(parsed)
+      const feedUrls = FEEDS[idx].feeds
+      const results = await Promise.allSettled(
+        feedUrls.map(async (url) => {
+          const res = await fetch(`/api/rss?url=${encodeURIComponent(url)}`)
+          if (!res.ok) return []
+          const xml = await res.text()
+          return parseRSS(xml)
+        })
+      )
+      const seen = new Set()
+      const allArticles = results
+        .filter(r => r.status === 'fulfilled')
+        .flatMap(r => r.value)
+        .filter(a => {
+          const key = a.title.toLowerCase().slice(0, 60)
+          if (seen.has(key)) return false
+          seen.add(key)
+          return true
+        })
+        .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
+        .slice(0, 30)
+
+      if (allArticles.length === 0) throw new Error('No articles found')
+      setArticles(allArticles)
     } catch (err) {
       setError(err.message)
       setArticles([])

@@ -1,8 +1,14 @@
 const ALLOWED_HOSTS = [
+  'rss.nytimes.com',
   'feeds.npr.org',
-  'feeds.bbci.co.uk',
-  'smittenkitchen.com',
-  'www.goodnewsnetwork.org',
+  'rss.cnn.com',
+  'feeds.washingtonpost.com',
+  'news.google.com',
+  'www.newsday.com',
+  'mississippitoday.org',
+  'www.al.com',
+  'www.housingwire.com',
+  'www.espn.com',
 ]
 
 export default async function handler(req, res) {
