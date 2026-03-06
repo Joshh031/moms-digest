@@ -37,12 +37,21 @@ const FEEDS = [
       'https://news.google.com/rss/search?q=Alabama+OR+Mississippi+news+when:3d&hl=en-US&gl=US&ceid=US:en',
     ],
   },
-  {
+ {
     name: 'Real Estate',
     emoji: '\u{1F3E0}',
     feeds: [
       'https://rss.nytimes.com/services/xml/rss/nyt/RealEstate.xml',
       'https://www.housingwire.com/feed/',
+    ],
+  },
+  {
+    name: 'Magazines',
+    emoji: '\u{1F4F0}',
+    feeds: [
+      'https://time.com/feed/',
+      'https://www.newyorker.com/feed/everything',
+      'https://people.com/feed/',
     ],
   },
 ]
