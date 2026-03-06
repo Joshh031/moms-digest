@@ -27,7 +27,7 @@ const FEEDS = [
     feeds: [
       'https://libn.com/feed/',
       'https://abc7ny.com/feed',
-      'https://gothamist.com/feed',
+      'https://nypost.com/metro/feed/',
     ],
   },
   {
