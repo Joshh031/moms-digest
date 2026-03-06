@@ -25,8 +25,8 @@ const FEEDS = [
     name: 'Long Island',
     emoji: '🗽',
     feeds: [
-      'https://feeds.feedburner.com/newsday/news',
       'https://libn.com/feed/',
+      'https://abc7ny.com/feed',
       'https://gothamist.com/feed',
     ],
   },
