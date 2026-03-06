@@ -21,11 +21,11 @@ const FEEDS = [
       'https://feeds.washingtonpost.com/rss/politics',
     ],
   },
- {
+{
     name: 'Long Island',
     emoji: '🗽',
     feeds: [
-      'https://www.newsday.com/news/rss',
+      'https://feeds.feedburner.com/newsday/news',
       'https://libn.com/feed/',
       'https://gothamist.com/feed',
     ],
@@ -54,8 +54,8 @@ const FEEDS = [
     emoji: '📰',
     feeds: [
       'https://time.com/feed/',
-      'https://www.newyorker.com/feed/news',
-      'https://feeds.feedburner.com/people/headlines',
+      'https://www.newyorker.com/feed/magazine/rss',
+      'https://people.com/thmb/rss/',
     ],
   },
   {
