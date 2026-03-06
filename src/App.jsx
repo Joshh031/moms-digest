@@ -21,13 +21,13 @@ const FEEDS = [
       'https://feeds.washingtonpost.com/rss/politics',
     ],
   },
-  {
+ {
     name: 'Long Island',
     emoji: '🗽',
     feeds: [
-      'https://www.newsday.com/arcio/rss/',
+      'https://www.newsday.com/news/rss',
       'https://libn.com/feed/',
-      'https://patch.com/new-york/long-island/rss.xml',
+      'https://gothamist.com/feed',
     ],
   },
   {
@@ -40,22 +40,22 @@ const FEEDS = [
       'https://whnt.com/feed/',
     ],
   },
-  {
+ {
     name: 'Real Estate',
     emoji: '🏡',
     feeds: [
       'https://rss.nytimes.com/services/xml/rss/nyt/RealEstate.xml',
-      'https://www.housingwire.com/feed/',
       'https://www.inman.com/feed/',
+      'https://www.realtor.com/news/feed/',
     ],
   },
-  {
+{
     name: 'Magazines',
     emoji: '📰',
     feeds: [
       'https://time.com/feed/',
-      'https://www.newyorker.com/feed/everything',
-      'https://people.com/feed/',
+      'https://www.newyorker.com/feed/news',
+      'https://feeds.feedburner.com/people/headlines',
     ],
   },
   {
