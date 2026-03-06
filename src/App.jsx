@@ -53,9 +53,9 @@ const FEEDS = [
     name: 'Magazines',
     emoji: '📰',
     feeds: [
-      'https://time.com/feed/',
-      'https://www.newyorker.com/feed/magazine/rss',
-      'https://people.com/thmb/rss/',
+      'https://feeds.feedburner.com/time/topstories',
+      'https://www.newyorker.com/feed/news',
+      'https://feeds.feedburner.com/people/headlines',
     ],
   },
   {
