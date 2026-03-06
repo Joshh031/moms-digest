@@ -3,16 +3,17 @@ import { useState, useEffect, useCallback } from 'react'
 const FEEDS = [
   {
     name: 'Geopolitics',
-    emoji: '\u{1F30D}',
+    emoji: '🌍',
     feeds: [
       'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
       'https://feeds.npr.org/1004/rss.xml',
       'http://rss.cnn.com/rss/cnn_world.rss',
+      'https://feeds.washingtonpost.com/rss/world',
     ],
   },
   {
     name: 'Politics',
-    emoji: '\u{1F3DB}\u{FE0F}',
+    emoji: '🏛️',
     feeds: [
       'https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml',
       'https://feeds.npr.org/1014/rss.xml',
@@ -22,36 +23,48 @@ const FEEDS = [
   },
   {
     name: 'Long Island',
-    emoji: '\u{1F5FD}',
+    emoji: '🗽',
     feeds: [
-      'https://news.google.com/rss/search?q=%22Long+Island%22+when:3d&hl=en-US&gl=US&ceid=US:en',
       'https://www.newsday.com/arcio/rss/',
+      'https://libn.com/feed/',
+      'https://patch.com/new-york/long-island/rss.xml',
     ],
   },
   {
     name: 'AL & MS',
-    emoji: '\u{1F3E1}',
+    emoji: '🌿',
     feeds: [
       'https://mississippitoday.org/feed/',
       'https://www.al.com/arc/outboundfeeds/rss/?outputType=xml',
-      'https://news.google.com/rss/search?q=Alabama+OR+Mississippi+news+when:3d&hl=en-US&gl=US&ceid=US:en',
+      'https://www.gulflive.com/arc/outboundfeeds/rss/?outputType=xml',
+      'https://whnt.com/feed/',
     ],
   },
- {
+  {
     name: 'Real Estate',
-    emoji: '\u{1F3E0}',
+    emoji: '🏡',
     feeds: [
       'https://rss.nytimes.com/services/xml/rss/nyt/RealEstate.xml',
       'https://www.housingwire.com/feed/',
+      'https://www.inman.com/feed/',
     ],
   },
   {
     name: 'Magazines',
-    emoji: '\u{1F4F0}',
+    emoji: '📰',
     feeds: [
       'https://time.com/feed/',
       'https://www.newyorker.com/feed/everything',
       'https://people.com/feed/',
+    ],
+  },
+  {
+    name: 'Sports',
+    emoji: '🏆',
+    feeds: [
+      'https://www.espn.com/espn/rss/news',
+      'https://www.espn.com/espn/rss/nfl/news',
+      'https://www.espn.com/espn/rss/mlb/news',
     ],
   },
 ]
@@ -88,8 +101,16 @@ function extractSource(link) {
     if (host.includes('newsday')) return 'Newsday'
     if (host.includes('mississippitoday')) return 'MS Today'
     if (host.includes('al.com')) return 'AL.com'
+    if (host.includes('gulflive')) return 'Gulf Live'
     if (host.includes('housingwire')) return 'HousingWire'
+    if (host.includes('inman')) return 'Inman'
     if (host.includes('espn')) return 'ESPN'
+    if (host.includes('time.com')) return 'TIME'
+    if (host.includes('newyorker')) return 'New Yorker'
+    if (host.includes('people')) return 'People'
+    if (host.includes('patch')) return 'Patch'
+    if (host.includes('libn')) return 'LIBN'
+    if (host.includes('whnt')) return 'WHNT'
     return host.split('.')[0]
   } catch {
     return ''
@@ -136,7 +157,6 @@ function parseRSS(xml) {
   const parser = new DOMParser()
   const doc = parser.parseFromString(xml, 'text/xml')
   if (doc.querySelector('parsererror')) return []
-
   const items = doc.querySelectorAll('item')
   return Array.from(items).slice(0, 20).map(item => ({
     title: item.querySelector('title')?.textContent?.trim() || '',
@@ -154,7 +174,6 @@ function Header() {
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric',
   })
-
   return (
     <header className="header">
       <h1>Patsy's Daily Digest</h1>
@@ -196,14 +215,15 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const fetchFeed = useCallback(async (idx) => {
+  const fetchFeeds = useCallback(async (idx) => {
     setLoading(true)
     setError(null)
+    setArticles([])
     try {
       const feedUrls = FEEDS[idx].feeds
       const results = await Promise.allSettled(
         feedUrls.map(async (url) => {
-         const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`)
+          const res = await fetch(`/api/rss?url=${encodeURIComponent(url)}`)
           if (!res.ok) return []
           const xml = await res.text()
           return parseRSS(xml)
@@ -214,13 +234,14 @@ export default function App() {
         .filter(r => r.status === 'fulfilled')
         .flatMap(r => r.value)
         .filter(a => {
+          if (!a.title) return false
           const key = a.title.toLowerCase().slice(0, 60)
           if (seen.has(key)) return false
           seen.add(key)
           return true
         })
         .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
-        .slice(0, 30)
+        .slice(0, 40)
 
       if (allArticles.length === 0) throw new Error('No articles found')
       setArticles(allArticles)
@@ -232,8 +253,8 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    fetchFeed(activeIdx)
-  }, [activeIdx, fetchFeed])
+    fetchFeeds(activeIdx)
+  }, [activeIdx, fetchFeeds])
 
   return (
     <div className="app">
@@ -259,7 +280,7 @@ export default function App() {
         ) : error ? (
           <div className="status">
             <p>Could not load feed</p>
-            <button className="retry" onClick={() => fetchFeed(activeIdx)}>
+            <button className="retry" onClick={() => fetchFeeds(activeIdx)}>
               Try Again
             </button>
           </div>
