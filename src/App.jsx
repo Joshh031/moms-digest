@@ -203,7 +203,7 @@ export default function App() {
       const feedUrls = FEEDS[idx].feeds
       const results = await Promise.allSettled(
         feedUrls.map(async (url) => {
-          const res = await fetch(`/api/rss?url=${encodeURIComponent(url)}`)
+         const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`)
           if (!res.ok) return []
           const xml = await res.text()
           return parseRSS(xml)
